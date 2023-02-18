@@ -4,6 +4,7 @@ import logger from 'use-reducer-logger';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Product from '../components/Product';
+import { Helmet } from 'react-helmet-async';
 //import data from '../data';
 
 const reducer = (state, action) => {
@@ -11,7 +12,7 @@ const reducer = (state, action) => {
     case 'FETCH_REQUEST':
       return { ...state, loading: true };
     case 'FETCH_SUCCESS':
-      return { ...state, product: action.payload, loading: false };
+      return { ...state, products: action.payload, loading: false };
     case 'FETCH_FAIL':
       return { ...state, loading: false, error: action.payload };
     default:
@@ -20,8 +21,8 @@ const reducer = (state, action) => {
 };
 
 function HomeScreen() {
-  const [{ loading, error, product }, dispatch] = useReducer(logger(reducer), {
-    product: [],
+  const [{ loading, error, products }, dispatch] = useReducer(logger(reducer), {
+    products: [],
     loading: true,
     error: '',
   });
@@ -41,6 +42,9 @@ function HomeScreen() {
   }, []);
   return (
     <div>
+      <Helmet>
+        <title>amazona</title>
+      </Helmet>
       <h1>Featured Product</h1>
       <div className="products">
         {loading ? (
@@ -49,7 +53,7 @@ function HomeScreen() {
           <div>{error}</div>
         ) : (
           <Row>
-            {product.map((product) => (
+            {products.map((product) => (
               <Col key={product.slug} sm={6} md={4} lg={3} className="mb-3">
                 <Product product={product}></Product>
               </Col>

@@ -19,6 +19,7 @@ main {
   background-color: #ffc000;
   color: #000000;
   font-weight: bold;
+  border: none;
 }
 
 .products {
@@ -42,4 +43,8 @@ main {
 }
 .product-info {
   padding: 1rem;
+}
+
+.img-large{
+  max-width: 100%;
 }

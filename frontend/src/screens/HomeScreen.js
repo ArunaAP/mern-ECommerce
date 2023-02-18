@@ -1,14 +1,39 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import logger from 'use-reducer-logger';
 //import data from '../data';
 
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'FETCH_REQUEST':
+      return { ...state, loading: true };
+    case 'FETCH_SUCCESS':
+      return { ...state, product: action.payload, loading: false };
+    case 'FETCH_FAIL':
+      return { ...state, loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
 function HomeScreen() {
-  const [product, setProduct] = useState([]);
+  const [{ loading, error, product }, dispatch] = useReducer(logger(reducer), {
+    product: [],
+    loading: true,
+    error: '',
+  });
+  // const [product, setProduct] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
-      const result = await axios.get('/api/product');
-      setProduct(result.data);
+      dispatch({ type: 'FETCH_REQUEST' });
+      try {
+        const result = await axios.get('/api/product');
+        dispatch({ type: 'FETCH_SUCCESS', payload: result.data });
+      } catch (err) {
+        dispatch({ type: 'FETCH_FAIL', payload: err.message });
+      }
+      // setProduct(result.data);
     };
     fetchData();
   }, []);
@@ -16,22 +41,28 @@ function HomeScreen() {
     <div>
       <h1>Featured Product</h1>
       <div className="products">
-        {product.map((product) => (
-          <div className="product" key={product.slug}>
-            <Link to={`/product/${product.slug}`}>
-              <img src={product.image} alt={product.name} />
-            </Link>
-            <div className="product-info">
+        {loading ? (
+          <div>Loading...</div>
+        ) : error ? (
+          <div>{error}</div>
+        ) : (
+          product.map((product) => (
+            <div className="product" key={product.slug}>
               <Link to={`/product/${product.slug}`}>
-                <p>
-                  <strong>${product.name}</strong>
-                </p>
+                <img src={product.image} alt={product.name} />
               </Link>
-              <p>{product.price}</p>
-              <button>Add to cart</button>
+              <div className="product-info">
+                <Link to={`/product/${product.slug}`}>
+                  <p>
+                    <strong>${product.name}</strong>
+                  </p>
+                </Link>
+                <p>{product.price}</p>
+                <button>Add to cart</button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );
